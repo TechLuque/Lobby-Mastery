@@ -253,7 +253,7 @@ const AdminDashboard = () => {
       {/* HEADER */}
       <header className="admin-dashboard-header">
         <div className="admin-header-content">
-          <div className="admin-logo-section">
+          <div className="admin-logo-section" onClick={() => navigate('/lobby')} style={{ cursor: 'pointer' }}>
             <div className="admin-logo-icon">
               <img src={logoLuque} alt="Logo Luque" className="admin-logo-img" />
             </div>

@@ -104,9 +104,10 @@
     font-size: 3.5rem;
     line-height: 1.1;
     margin-bottom: 20px;
-    font-weight: 900;
+    font-weight: 400;
     color: var(--white);
-    word-wrap: break-word;
+    font-family: var(--font-main);
+    white-space: nowrap;
 }
 
 .overlay p {

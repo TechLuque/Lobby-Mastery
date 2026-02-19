@@ -69,7 +69,7 @@ const Codigo = () => {
       <>
         {/* NAVBAR */}
         <nav className="navbar">
-          <div className="logo"><img src={logoLuque} alt="Luque Academy" className="logo-img" /></div>
+          <div className="logo" onClick={() => navigate('/lobby')} style={{ cursor: 'pointer' }}><img src={logoLuque} alt="Luque Academy" className="logo-img" /></div>
           <ul className="nav-links">
             <li>
               <a href="#" onClick={(e) => { e.preventDefault(); handleBackToLobby(); }}>Inicio</a>
@@ -115,7 +115,7 @@ const Codigo = () => {
     <div className="product-page sala-codigo">
       {/* NAVBAR */}
       <nav className="navbar">
-        <div className="logo"><img src={logoLuque} alt="Luque Academy" className="logo-img" /></div>
+        <div className="logo" onClick={() => navigate('/lobby')} style={{ cursor: 'pointer' }}><img src={logoLuque} alt="Luque Academy" className="logo-img" /></div>
         <ul className="nav-links">
           <li>
             <a href="#" onClick={(e) => { e.preventDefault(); handleBackToLobby(); }}>Inicio</a>

@@ -77,8 +77,7 @@ const Login = () => {
         >
           <div className="overlay">
             <h1>
-              Lobby <br />
-              <span className="text-gold">Master</span>
+              Lobby <span className="text-gold">Mastery</span>
             </h1>
             <p>
               Accede a tu panel personalizado y comienza tu transformación hoy.
@@ -89,7 +88,7 @@ const Login = () => {
         {/* RIGHT PANE — Formulario */}
         <section className="right-pane">
           <div className="login-box">
-            <h2>Bienvenido De Nuevo</h2>
+            <h2>Bienvenido de Nuevo</h2>
             <p className="subtitle">
               Ingresa tu email para acceder a tu cuenta.
             </p>
