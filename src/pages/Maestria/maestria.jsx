@@ -87,10 +87,10 @@ const Maestria = () => {
         <div className="modal-overlay">
           <div className="modal-box">
             <button className="modal-close" onClick={handleBackToLobby}>&times;</button>
-            <h2>Acceso Denegado</h2>
+            <h2>Tu acceso está limitado</h2>
             <p>No tienes acceso a este módulo en este momento.</p>
             <p className="modal-info">
-              Si crees que es un error, contáctanos por WhatsApp para resolver tu acceso.
+              🔓 Desbloquea el acceso y lleva tu productividad al siguiente nivel.
             </p>
             <div className="modal-buttons">
               <a
