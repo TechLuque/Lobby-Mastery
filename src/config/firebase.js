@@ -5,23 +5,22 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
-// Uses environment variables for security
+// Uses environment variables for security, with fallback defaults
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCT9DNf71aplxi5rQaUynCT49WyK2Qt3U0",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "lobby-master-690ed.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "lobby-master-690ed",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "lobby-master-690ed.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "987203694911",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:987203694911:web:83ffa43fe1c78d5c24e38a",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-VZFME5789Z"
 };
 
-// Validate that required environment variables are set
-const requiredEnvVars = ['VITE_FIREBASE_API_KEY', 'VITE_FIREBASE_AUTH_DOMAIN', 'VITE_FIREBASE_PROJECT_ID'];
-for (const envVar of requiredEnvVars) {
-  if (!import.meta.env[envVar]) {
-    console.error(`Missing required environment variable: ${envVar}`);
-  }
+// Log which source the config is using
+if (import.meta.env.DEV) {
+  console.log("Firebase config source:", 
+    import.meta.env.VITE_FIREBASE_API_KEY ? "Environment variables" : "Fallback defaults"
+  );
 }
 
 // Initialize Firebase
