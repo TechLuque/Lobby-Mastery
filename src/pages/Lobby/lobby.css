@@ -1,0 +1,762 @@
+/* LOBBY.CSS - Estilos del Lobby */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap');
+
+:root {
+    --color-sala-1: #69E4FF;
+    --color-sala-2: #ffd204;
+    --color-sala-3: #eaeaea;
+    --primary-gradient: linear-gradient(135deg, #eaeaea 0%, #d0d0d0 50%);
+    --secondary-gradient: linear-gradient(135deg, #eaeaea 0%, #d0d0d0 50%);
+    --tertiary-gradient: linear-gradient(115deg, #eaeaea 0%, #d0d0d0 20%);
+    --dark-bg: #000000;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --text-primary: #ffffff;
+    --text-secondary: #ffffff;
+    --border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* =========================================================
+   RESET
+   ========================================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    background: #000000;
+    font-family: 'Montserrat', sans-serif;
+    color: var(--text-primary);
+    position: relative;
+    line-height: 1.6;
+}
+
+/* =========================================================
+   NAVBAR
+   ========================================================= */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 50px;
+    z-index: 99999;
+    box-sizing: border-box;
+    background-color: #000;
+}
+
+.logo {
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    color: #fff;
+}
+
+.logo-img {
+    height: 50px;
+    width: auto;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    align-items: center;
+    gap: 30px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #fff;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: #D4AF37;
+}
+
+.btn-gold-outline {
+    border: 1px solid #D4AF37;
+    padding: 8px 20px;
+    color: #D4AF37 !important;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-gold-outline:hover {
+    background: #D4AF37;
+    color: #000 !important;
+}
+
+.logout-nav-btn {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* =========================================================
+   BACKGROUND ORBS
+   ========================================================= */
+.background-orbs {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.3;
+    animation: float 20s ease-in-out infinite;
+}
+
+.orb-1 {
+    width: 400px;
+    height: 400px;
+    background: var(--primary-gradient);
+    top: -200px;
+    left: -200px;
+    animation-delay: 0s;
+}
+
+.orb-2 {
+    width: 300px;
+    height: 300px;
+    background: var(--secondary-gradient);
+    top: 50%;
+    right: -150px;
+    animation-delay: 5s;
+}
+
+.orb-3 {
+    width: 350px;
+    height: 300px;
+    background: var(--tertiary-gradient);
+    bottom: -100px;
+    left: 50%;
+    animation-delay: 10s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(30px, -50px) scale(1.1); }
+    50% { transform: translate(-20px, 20px) scale(0.9); }
+    75% { transform: translate(50px, 50px) scale(1.05); }
+}
+
+/* =========================================================
+   CONTAINER
+   ========================================================= */
+.container {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 20px 40px;
+}
+
+.content {
+    width: 100%;
+    max-width: 1200px;
+    text-align: center;
+}
+
+/* =========================================================
+   TÍTULOS
+   ========================================================= */
+.main-title {
+    font-size: 4rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    letter-spacing: -1px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.title-word {
+    display: inline-block;
+    animation: fadeInUp 0.8s ease-out forwards;
+    color: var(--text-primary);
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================================
+   USER GREETING
+   ========================================================= */
+.user-greeting {
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 5px;
+    letter-spacing: 0.5px;
+    animation: fadeInUp 0.8s ease-out 0.3s forwards;
+    opacity: 0;
+}
+
+/* =========================================================
+   ROOMS GRID
+   ========================================================= */
+.rooms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+    animation: fadeInUp 0.8s ease-out 0.5s forwards;
+    opacity: 0;
+}
+
+/* =========================================================
+   ROOM CARD
+   ========================================================= */
+.room-card {
+    position: relative;
+    background: var(--card-bg);
+    border: none;
+    border-radius: 20px;
+    padding: 50px 40px 40px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    opacity: 0;
+}
+
+.room-card:nth-child(1) { animation-delay: 0.6s; }
+.room-card:nth-child(2) { animation-delay: 0.7s; }
+.room-card:nth-child(3) { animation-delay: 0.8s; }
+
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.card-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.room-card:hover .card-glow {
+    opacity: 1;
+}
+
+/* =========================================================
+   CARD CONTENT
+   ========================================================= */
+.card-content {
+    position: relative;
+    z-index: 2;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.icon-box {
+    width: 80px;
+    height: 80px;
+    background: transparent;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 25px;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.icon-box img {
+    width: 240px;
+    height: 240px;
+    object-fit: contain;
+}
+
+.room-card:hover .icon-box {
+    transform: translateY(-10px) scale(1.1);
+}
+
+.card-content h2 {
+    font-size: 1.8rem;
+    margin-bottom: 12px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+}
+
+.room-card:nth-child(1) .card-content h2,
+.room-card:nth-child(1) .card-content p {
+    color: #ffffff;
+}
+
+.room-card:nth-child(2) .card-content h2,
+.room-card:nth-child(2) .card-content p {
+    color: #ffffff;
+}
+
+.room-card:nth-child(3) .card-content h2,
+.room-card:nth-child(3) .card-content p {
+    color: #ffffff;
+}
+
+.card-content p {
+    font-size: 0.95rem;
+    margin-bottom: 30px;
+    line-height: 1.5;
+    flex-grow: 1;
+    text-align: center;
+}
+
+/* =========================================================
+   STATS
+   ========================================================= */
+.card-stats {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.stat {
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+}
+
+.room-card:hover .stat {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.stat i {
+    font-size: 0.75rem;
+}
+
+/* =========================================================
+   ENTER BUTTON (colores por sala)
+   ========================================================= */
+.enter-btn {
+    position: relative;
+    z-index: 3;
+    padding: 14px 30px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #000000;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: 100%;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.room-card:nth-child(1) .enter-btn {
+    background: #69E4FF;
+    box-shadow: 0 4px 15px rgba(105, 228, 255, 0.4);
+}
+
+.room-card:nth-child(2) .enter-btn {
+    background: #ffd204;
+    box-shadow: 0 4px 15px rgba(255, 210, 4, 0.4);
+}
+
+.room-card:nth-child(3) .enter-btn {
+    background: #eaeaea;
+    box-shadow: 0 4px 15px rgba(234, 234, 234, 0.4);
+}
+
+.enter-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    transition: left 0.3s ease;
+}
+
+.enter-btn:hover::before {
+    left: 100%;
+}
+
+.enter-btn:hover {
+    transform: translateY(-3px);
+}
+
+.room-card:nth-child(1) .enter-btn:hover {
+    box-shadow: 0 8px 25px rgba(105, 228, 255, 0.6);
+}
+
+.room-card:nth-child(2) .enter-btn:hover {
+    box-shadow: 0 8px 25px rgba(255, 210, 4, 0.6);
+}
+
+.room-card:nth-child(3) .enter-btn:hover {
+    box-shadow: 0 8px 25px rgba(234, 234, 234, 0.6);
+}
+
+.enter-btn i {
+    transition: transform 0.3s ease;
+}
+
+.enter-btn:hover i {
+    transform: translateX(5px);
+}
+
+/* =========================================================
+   HOVER EN TARJETA
+   ========================================================= */
+.room-card:hover {
+    transform: translateY(-10px);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.room-card:nth-child(1):hover {
+    box-shadow: 0 0 30px rgba(105, 228, 255, 0.4), 0 0 60px rgba(105, 228, 255, 0.15);
+}
+
+.room-card:nth-child(2):hover {
+    box-shadow: 0 0 30px rgba(255, 210, 4, 0.4), 0 0 60px rgba(255, 210, 4, 0.15);
+}
+
+.room-card:nth-child(3):hover {
+    box-shadow: 0 0 30px rgba(234, 234, 234, 0.4), 0 0 60px rgba(234, 234, 234, 0.15);
+}
+
+/* =========================================================
+   LOCKED ROOM
+   ========================================================= */
+.room-card.room-locked {
+    opacity: 0.6;
+}
+
+.room-card.room-locked:hover {
+    transform: translateY(-5px);
+}
+
+.lock-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 35px;
+    height: 35px;
+    background: rgba(255, 107, 107, 0.2);
+    border: 1px solid rgba(255, 107, 107, 0.4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+}
+
+.lock-badge i {
+    color: #ff6b6b;
+    font-size: 0.85rem;
+}
+
+.btn-locked {
+    background: rgba(255, 107, 107, 0.15) !important;
+    color: #ff6b6b !important;
+    border: 1px solid rgba(255, 107, 107, 0.3) !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
+}
+
+.btn-locked:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.btn-locked::before {
+    display: none;
+}
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 100000;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.9);
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background-color: #1a1a1a;
+    padding: 40px;
+    border-radius: 15px;
+    max-width: 500px;
+    width: 90%;
+    border: 1px solid #333;
+    position: relative;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(50px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-close {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    font-size: 28px;
+    cursor: pointer;
+    color: white;
+    border: none;
+    background: none;
+    transition: color 0.3s ease;
+}
+
+.modal-close:hover {
+    color: var(--color-sala-1);
+}
+
+.modal-content h2 {
+    color: white;
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+.modal-content p {
+    color: #ccc;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.modal-info {
+    font-size: 0.9rem;
+    color: #999;
+    margin-bottom: 20px;
+}
+
+.modal-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-whatsapp,
+.modal .btn-secondary {
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.btn-whatsapp {
+    background: #25d366;
+    color: white;
+}
+
+.btn-whatsapp:hover {
+    background: #20ba5d;
+    transform: translateY(-2px);
+}
+
+.modal .btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 15px 20px;
+    }
+
+    .logo {
+        font-size: 1.1rem;
+    }
+
+    .logo-img {
+        height: 40px;
+    }
+
+    .nav-links {
+        gap: 15px;
+    }
+
+    .nav-links a,
+    .btn-gold-outline {
+        font-size: 0.75rem;
+    }
+
+    .main-title {
+        font-size: 2.5rem;
+        gap: 10px;
+    }
+
+    .rooms-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .room-card {
+        padding: 30px 20px 20px;
+    }
+
+    .icon-box {
+        width: 70px;
+        height: 70px;
+    }
+
+    .icon-box img {
+        width: 180px;
+        height: 180px;
+    }
+
+    .card-content h2 {
+        font-size: 1.5rem;
+    }
+
+    .card-content p {
+        font-size: 0.9rem;
+    }
+
+    .enter-btn {
+        padding: 12px 25px;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar {
+        padding: 12px 15px;
+    }
+
+    .logo {
+        font-size: 0.9rem;
+    }
+
+    .logo-img {
+        height: 34px;
+    }
+
+    .nav-links {
+        gap: 10px;
+    }
+
+    .container {
+        padding: 80px 15px 20px;
+    }
+
+    .main-title {
+        font-size: 1.8rem;
+    }
+
+    .room-card {
+        padding: 25px 15px 15px;
+    }
+
+    .icon-box {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 15px;
+    }
+
+    .icon-box img {
+        width: 150px;
+        height: 150px;
+    }
+
+    .card-content h2 {
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+    }
+
+    .card-stats {
+        margin-bottom: 15px;
+    }
+
+    .enter-btn {
+        padding: 12px 20px;
+        font-size: 0.9rem;
+    }
+}

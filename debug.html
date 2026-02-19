@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug - Lobby</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        pre {
+            background: #000;
+            padding: 10px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Debug Info - Lobby</h1>
+    
+    <h2>1. Environment</h2>
+    <pre id="env"></pre>
+    
+    <h2>2. React Status</h2>
+    <pre id="react"></pre>
+    
+    <h2>3. Router Status</h2>
+    <pre id="router"></pre>
+    
+    <h2>4. localStorage</h2>
+    <pre id="storage"></pre>
+    
+    <p>
+        <a href="/">Ir a la app →</a>
+    </p>
+    
+    <script>
+        document.getElementById('env').textContent = 
+            `URL: ${window.location.href}\n` +
+            `Origin: ${window.location.origin}\n` +
+            `Pathname: ${window.location.pathname}\n` +
+            `Hash: ${window.location.hash}`;
+        
+        document.getElementById('react').textContent = 
+            `React: ${typeof window.React !== 'undefined' ? '✅ Cargado' : '❌ No cargado'}\n` +
+            `ReactDOM: ${typeof window.ReactDOM !== 'undefined' ? '✅ Cargado' : '❌ No cargado'}`;
+        
+        document.getElementById('router').textContent = 
+            `Location: ${window.location.pathname}\n` +
+            `BrowserRouter should work: ${window.history ? '✅ Sí' : '❌ No'}`;
+        
+        document.getElementById('storage').textContent = 
+            `userAuth: ${localStorage.getItem('userAuth') || '(no establecido)'}\n` +
+            `Keys: ${Object.keys(localStorage).join(', ') || '(vacío)'}`;
+    </script>
+</body>
+</html>
