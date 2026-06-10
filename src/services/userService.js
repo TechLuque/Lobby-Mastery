@@ -107,14 +107,33 @@ export const createUser = async (userData) => {
     const nextNumber = await getNextUserNumber();
     const curso = (userData.curso || "").toLowerCase().trim();
 
+    // Definir accesos según el curso
+    let acceso_codigo = false;
+    let acceso_maquina = false;
+    let acceso_maestria = false;
+
+    if (curso === "maestria") {
+      // Maestría habilita: maestría, máquina y códigos
+      acceso_maestria = true;
+      acceso_maquina = true;
+      acceso_codigo = true;
+    } else if (curso === "maquina") {
+      // Máquina habilita: máquina y códigos
+      acceso_maquina = true;
+      acceso_codigo = true;
+    } else if (curso === "codigo") {
+      // Códigos solo habilita: códigos
+      acceso_codigo = true;
+    }
+
     const newUser = {
       nombre: userData.nombre || "",
       email: normalizedEmail,
       numero: nextNumber,
       curso: curso,
-      acceso_codigo: curso === "codigo",
-      acceso_maquina: curso === "maquina",
-      acceso_maestria: curso === "maestria",
+      acceso_codigo: acceso_codigo,
+      acceso_maquina: acceso_maquina,
+      acceso_maestria: acceso_maestria,
       createdAt: serverTimestamp(),
       lastLogin: null,
     };
@@ -289,14 +308,34 @@ export const importUsersFromCSV = async (usersData) => {
         }
 
         const curso = userData.curso || "";
+        
+        // Definir accesos según el curso
+        let acceso_codigo = false;
+        let acceso_maquina = false;
+        let acceso_maestria = false;
+
+        if (curso === "maestria") {
+          // Maestría habilita: maestría, máquina y códigos
+          acceso_maestria = true;
+          acceso_maquina = true;
+          acceso_codigo = true;
+        } else if (curso === "maquina") {
+          // Máquina habilita: máquina y códigos
+          acceso_maquina = true;
+          acceso_codigo = true;
+        } else if (curso === "codigo") {
+          // Códigos solo habilita: códigos
+          acceso_codigo = true;
+        }
+
         const newUser = {
           nombre: userData.nombre || "",
           email: userData.email.toLowerCase().trim(),
           numero: nextNumber++,
           curso: curso,
-          acceso_codigo: curso === "codigo",
-          acceso_maquina: curso === "maquina",
-          acceso_maestria: curso === "maestria",
+          acceso_codigo: acceso_codigo,
+          acceso_maquina: acceso_maquina,
+          acceso_maestria: acceso_maestria,
           createdAt: serverTimestamp(),
           lastLogin: null,
         };
