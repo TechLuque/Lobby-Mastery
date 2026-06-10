@@ -1,0 +1,22 @@
+/* APP.CSS - Estilos de la aplicación principal */
+
+:root {
+    --primary-color: #69E4FF;
+    --secondary-color: #4fd4ff;
+    --dark-bg: #0a0a0a;
+    --card-bg: #1a1a1a;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --border-color: #69E4FF;
+    --shadow-color: rgba(105, 228, 255, 0.3);
+}
+
+body {
+    background: var(--dark-bg);
+    color: var(--text-primary);
+}
+
+#root {
+    width: 100%;
+    min-height: 100vh;
+}
