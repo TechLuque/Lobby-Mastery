@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Admins - Luque Academy</title>
+    <style>
+        body {
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #fff;
+        }
+        .container {
+            background: rgba(20, 20, 20, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            text-align: center;
+            margin-top: 0;
+            color: #ffffff;
+            font-size: 1.8rem;
+        }
+        .info {
+            background: rgba(0, 150, 255, 0.1);
+            border-left: 4px solid #0096ff;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        button {
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+            font-weight: 600;
+        }
+        .status.success {
+            background: rgba(0, 255, 100, 0.2);
+            border: 1px solid rgba(0, 255, 100, 0.5);
+            color: #00ff64;
+            display: block;
+        }
+        .status.error {
+            background: rgba(255, 0, 100, 0.2);
+            border: 1px solid rgba(255, 0, 100, 0.5);
+            color: #ff6464;
+            display: block;
+        }
+        .admin-list {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        .admin-list h3 {
+            margin: 0 0 10px 0;
+            font-size: 0.95rem;
+        }
+        .admin-item {
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            margin: 5px 0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚙️ Setup Admins</h1>
+        
+        <div class="info">
+            <strong>Instrucciones:</strong><br>
+            1. Antes de hacer clic, asegúrate de haber creado estos usuarios en Firebase Console:<br>
+            • soporte@luqueacademy.com (Contraseña: S0p0r3#26.20)<br>
+            • tech@luqueacademy.com (Contraseña: T3c#.99.0)<br>
+            2. Luego haz clic en el botón de abajo para guardar los emails en Firestore.
+        </div>
+
+        <button id="setupBtn" onclick="setupAdmins()">
+            ✓ Guardar Admins en Firestore
+        </button>
+
+        <button id="verifyBtn" onclick="verifyAdmins()" style="background: #69E4FF; color: #000;">
+            🔍 Verificar Admins Guardados
+        </button>
+
+        <div id="status" class="status"></div>
+        
+        <div id="adminList" class="admin-list" style="display: none;">
+            <h3>Admins en Firestore:</h3>
+            <div id="emailsList"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+        import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBpHwv7eHHuGw8PoqKhZlH_K3fQADULymc",
+            authDomain: "lobby-master-690ed.firebaseapp.com",
+            projectId: "lobby-master-690ed",
+            storageBucket: "lobby-master-690ed.appspot.com",
+            messagingSenderId: "779166706261",
+            appId: "1:779166706261:web:d00cd6b77cfe5ab0cd3a89"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.setupAdmins = async function() {
+            const btn = document.getElementById('setupBtn');
+            const status = document.getElementById('status');
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ Procesando...';
+            
+            try {
+                const adminEmails = [
+                    'nolsan.223@gmail.com',  // Admin original
+                    'soporte@luqueacademy.com',
+                    'tech@luqueacademy.com'
+                ];
+
+                const configRef = doc(db, 'config', 'admin');
+                
+                // Guardar en Firestore
+                await setDoc(configRef, {
+                    adminEmails: adminEmails,
+                    updatedAt: new Date().toISOString()
+                }, { merge: true });
+
+                status.className = 'status success';
+                status.innerHTML = '✓ Admins guardados exitosamente en Firestore<br><small>Ya puedes ingresar al panel con estos usuarios</small>';
+                
+                console.log('Admins guardados:', adminEmails);
+                
+                // Mostrar lista
+                setTimeout(() => verifyAdmins(), 1000);
+                
+            } catch (error) {
+                status.className = 'status error';
+                status.innerHTML = '✗ Error: ' + error.message;
+                console.error('Error detallado:', error);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '✓ Guardar Admins en Firestore';
+            }
+        };
+
+        window.verifyAdmins = async function() {
+            const status = document.getElementById('status');
+            const adminList = document.getElementById('adminList');
+            const emailsList = document.getElementById('emailsList');
+            
+            try {
+                const configRef = doc(db, 'config', 'admin');
+                const configSnap = await getDoc(configRef);
+
+                if (configSnap.exists()) {
+                    const data = configSnap.data();
+                    const adminEmails = data.adminEmails || [];
+
+                    status.className = 'status success';
+                    status.textContent = '✓ Se encontraron ' + adminEmails.length + ' admins en Firestore';
+
+                    adminList.style.display = 'block';
+                    emailsList.innerHTML = adminEmails.map(email => 
+                        `<div class="admin-item">📧 ${email}</div>`
+                    ).join('');
+                } else {
+                    status.className = 'status error';
+                    status.textContent = '✗ No existe el documento config/admin en Firestore';
+                    adminList.style.display = 'none';
+                }
+            } catch (error) {
+                status.className = 'status error';
+                status.textContent = '✗ Error al verificar: ' + error.message;
+                console.error(error);
+            }
+        };
+    </script>
+</body>
+</html>
