@@ -82,8 +82,23 @@ async function getZoomToken() {
    5. Devuelve el join_url al frontend para el botón
 ========================= */
 
-export const getZoomMeetingLink = onRequest({ cors: true }, async (req, res) => {
+export const getZoomMeetingLink = onRequest({ cors: ["localhost", "http://localhost:5173", "http://localhost:3000"] }, async (req, res) => {
+  // Manejar preflight requests (OPTIONS)
+  if (req.method === "OPTIONS") {
+    res.set("Access-Control-Allow-Origin", req.headers.origin || "*");
+    res.set("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS, POST, PUT");
+    res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.set("Access-Control-Max-Age", "3600");
+    res.status(204).send("");
+    return;
+  }
+
   try {
+    // Agregar headers CORS a la respuesta
+    res.set("Access-Control-Allow-Origin", req.headers.origin || "*");
+    res.set("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS, POST, PUT");
+    res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
     /* -------- VALIDAR AUTH -------- */
     const authHeader = req.headers.authorization;
 

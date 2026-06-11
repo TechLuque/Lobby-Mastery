@@ -48,7 +48,7 @@ const Maestria = () => {
 
   const handleJoinZoom = async () => {
     setJoiningZoom(true);
-    const result = await joinZoomMeeting('maestria', 'Maestría');
+    const result = await joinZoomMeeting('maestria', 'Maestría del Dinero');
     setJoiningZoom(false);
     
     if (!result.success) {

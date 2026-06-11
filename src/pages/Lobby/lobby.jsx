@@ -175,7 +175,7 @@ const Lobby = () => {
               </button>
             </div>
 
-            {/* Sala 3: Maestría */}
+            {/* Sala 3: Maestría del Dinero */}
             <div className={`room-card ${!userData?.acceso_maestria ? 'room-locked' : ''}`} data-room="3">
               <div className="card-glow"></div>
               {!userData?.acceso_maestria && (
@@ -183,7 +183,7 @@ const Lobby = () => {
               )}
               <div className="card-content">
                 <div className="icon-box">
-                  <img src={logoMST} alt="Logo Maestría" />
+                  <img src={logoMST} alt="Logo Maestría del Dinero" />
                 </div>
                 <p>Acompañamiento personal y presencial para empresarios que quieren crecer entre un 40% y un 120% anual.</p>
               </div>

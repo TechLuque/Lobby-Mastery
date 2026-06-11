@@ -3,12 +3,14 @@ import { auth } from "../config/firebase";
 /**
  * URL de la Cloud Function v2
  * Configurada mediante variable de entorno VITE_CLOUD_FUNCTION_URL
+ * En desarrollo local usa http://localhost:3001/getZoomMeetingLink
  */
-const CLOUD_FUNCTION_URL = import.meta.env.VITE_CLOUD_FUNCTION_URL ||
-  "https://us-central1-lobby-master-690ed.cloudfunctions.net/getZoomMeetingLink";
+const isDev = import.meta.env.DEV;
+const CLOUD_FUNCTION_URL = import.meta.env.VITE_CLOUD_FUNCTION_URL || 
+  (isDev ? "http://localhost:3001/getZoomMeetingLink" : "https://us-central1-lobby-master-690ed.cloudfunctions.net/getZoomMeetingLink");
 
 if (!import.meta.env.VITE_CLOUD_FUNCTION_URL) {
-  console.warn("VITE_CLOUD_FUNCTION_URL not set, using default URL");
+  console.log(`[Zoom Service] Usando URL: ${CLOUD_FUNCTION_URL}`);
 }
 
 /**

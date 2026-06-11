@@ -552,7 +552,7 @@ const AdminDashboard = () => {
                         <li><strong>curso:</strong> Uno de estos valores EXACTOS:
                           <ul>
                             <li><code>codigo</code> - Código del Dinero</li>
-                            <li><code>maquina</code> - La Máquina</li>
+                            <li><code>maquina</code> - Máquina del Dinero</li>
                             <li><code>maestria</code> - Maestría del Dinero</li>
                           </ul>
                         </li>
@@ -654,13 +654,13 @@ const AdminDashboard = () => {
 
                     <div className="form-group">
                       <label htmlFor="zoom-maquina">
-                        Meeting ID - La Máquina
+                        Meeting ID - Máquina del Dinero
                         <span className="required">*</span>
                       </label>
                       <input
                         type="text"
                         id="zoom-maquina"
-                        placeholder="Ingresa el Meeting ID para Máquina"
+                        placeholder="Ingresa el Meeting ID para Máquina del Dinero"
                         value={zoomConfig.ZOOM_MAQUINA_ID}
                         onChange={(e) => handleZoomConfigChange('ZOOM_MAQUINA_ID', e.target.value)}
                         disabled={savingZoom}
@@ -677,7 +677,7 @@ const AdminDashboard = () => {
                       <input
                         type="text"
                         id="zoom-maestria"
-                        placeholder="Ingresa el Meeting ID para Maestría"
+                        placeholder="Ingresa el Meeting ID para Maestría del Dinero"
                         value={zoomConfig.ZOOM_MAESTRIA_ID}
                         onChange={(e) => handleZoomConfigChange('ZOOM_MAESTRIA_ID', e.target.value)}
                         disabled={savingZoom}
