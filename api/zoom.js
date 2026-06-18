@@ -108,11 +108,16 @@ export default async function handler(req, res) {
       { method: 'POST', headers: { Authorization: `Basic ${zoomAuth}` } }
     );
     const d = await r.json();
-    if (!d.access_token) throw new Error('Sin token');
+    if (!d.access_token) {
+      console.error('Zoom token error:', JSON.stringify(d));
+      return res.status(500).json({
+        error: `Zoom: ${d.reason || d.message || JSON.stringify(d)}`,
+      });
+    }
     zoomToken = d.access_token;
-  } catch {
+  } catch (e) {
     return res.status(500).json({
-      error: 'No se pudo conectar con Zoom. Verifica las credenciales en Vercel.',
+      error: 'No se pudo conectar con Zoom: ' + e.message,
     });
   }
 
