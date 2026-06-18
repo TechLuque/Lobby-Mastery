@@ -1,15 +1,6 @@
 import { auth } from "../config/firebase";
 
-/**
- * URL de la Cloud Function v2
- * Configurada mediante variable de entorno VITE_CLOUD_FUNCTION_URL
- */
-const CLOUD_FUNCTION_URL = import.meta.env.VITE_CLOUD_FUNCTION_URL ||
-  "https://us-central1-lobby-master-690ed.cloudfunctions.net/getZoomMeetingLink";
-
-if (!import.meta.env.VITE_CLOUD_FUNCTION_URL) {
-  console.warn("VITE_CLOUD_FUNCTION_URL not set, using default URL");
-}
+const ZOOM_API_URL = '/api/zoom';
 
 /**
  * Obtener URL de reunión Zoom desde Cloud Function v2
@@ -47,7 +38,7 @@ export const getZoomMeetingLink = async (sala) => {
     const token = await currentUser.getIdToken();
 
     // Llamar a la Cloud Function CON header Authorization
-    const response = await fetch(CLOUD_FUNCTION_URL, {
+    const response = await fetch(ZOOM_API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
