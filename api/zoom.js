@@ -60,6 +60,7 @@ export default async function handler(req, res) {
   let userName = 'Usuario';
   let userCurso = meetingKey;
   let cachedJoinUrl = null;
+  let userDocName = null;
   try {
     const r = await fetch(`${FIRESTORE}:runQuery`, {
       method: 'POST',
@@ -81,6 +82,7 @@ export default async function handler(req, res) {
     const d = await r.json();
     if (d[0]?.document?.fields) {
       const fields = d[0].document.fields;
+      userDocName = d[0].document.name;
       userName = fields.nombre?.stringValue || 'Usuario';
       userCurso = fields.curso?.stringValue || meetingKey;
       const cachedLink = fields.zoom_links?.mapValue?.fields?.[meetingKey]?.stringValue;
@@ -95,6 +97,31 @@ export default async function handler(req, res) {
 
   if (cachedJoinUrl) {
     return res.json({ joinUrl: cachedJoinUrl });
+  }
+
+  async function cacheJoinUrl(joinUrl) {
+    if (!userDocName) return;
+    try {
+      const patchUrl =
+        `https://firestore.googleapis.com/v1/${userDocName}` +
+        `?updateMask.fieldPaths=zoom_links.${meetingKey}` +
+        `&updateMask.fieldPaths=zoom_meeting_ids.${meetingKey}`;
+      await fetch(patchUrl, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fields: {
+            zoom_links: { mapValue: { fields: { [meetingKey]: { stringValue: joinUrl } } } },
+            zoom_meeting_ids: { mapValue: { fields: { [meetingKey]: { stringValue: meetingId } } } },
+          },
+        }),
+      });
+    } catch {
+      // No fatal: si falla el cacheo, el proximo intento volvera a registrar en Zoom
+    }
   }
 
   const zoomAuth = Buffer.from(
@@ -144,13 +171,16 @@ export default async function handler(req, res) {
     const regData = await regRes.json();
 
     if (regData.join_url) {
+      await cacheJoinUrl(regData.join_url);
       return res.json({ joinUrl: regData.join_url });
     }
 
     if (
       regData.code === 3000 ||
       regData.code === 300 ||
-      regData.message?.toLowerCase().includes('registration')
+      regData.message?.toLowerCase().includes('registration') ||
+      regData.message?.toLowerCase().includes('registrant') ||
+      regData.message?.toLowerCase().includes('rate limit')
     ) {
       const meetRes = await fetch(
         `https://api.zoom.us/v2/meetings/${meetingId}`,
@@ -162,6 +192,7 @@ export default async function handler(req, res) {
       }
       const displayName = `${userName} | ${userCurso.toUpperCase()}`;
       const joinUrl = `${meetData.join_url}${meetData.join_url.includes('?') ? '&' : '?'}uname=${encodeURIComponent(displayName)}`;
+      await cacheJoinUrl(joinUrl);
       return res.json({ joinUrl });
     }
 
