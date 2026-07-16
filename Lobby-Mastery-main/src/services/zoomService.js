@@ -89,9 +89,10 @@ export const getZoomMeetingLink = async (sala) => {
  *
  * @param {string} sala - "codigo" | "maquina" | "maestria"
  * @param {string} salaName - Nombre descriptivo de la sala (para logs)
+ * @param {Window} [meetingWindow] - Ventana abierta de forma síncrona en el click
  * @returns {Promise<{success: boolean, error?: string}>}
  */
-export const joinZoomMeeting = async (sala, salaName) => {
+export const joinZoomMeeting = async (sala, salaName, meetingWindow) => {
   try {
     console.log(`Iniciando unión a Zoom: ${salaName}`);
 
@@ -99,18 +100,29 @@ export const joinZoomMeeting = async (sala, salaName) => {
 
     if (!result.success) {
       console.error("Error al obtener URL:", result.error);
+      if (meetingWindow && !meetingWindow.closed) {
+        meetingWindow.close();
+      }
       return {
         success: false,
         error: result.error || "No se pudo generar la URL de reunión",
       };
     }
 
-    // Abrir en nueva ventana con el link único personalizado
-    window.open(result.joinUrl, `zoom_${sala}`, "width=1200,height=800");
+    // Reutiliza la ventana abierta de forma síncrona en el click (evita el
+    // bloqueo de pop-ups de navegadores móviles ante window.open tras un await)
+    if (meetingWindow && !meetingWindow.closed) {
+      meetingWindow.location.href = result.joinUrl;
+    } else {
+      window.open(result.joinUrl, `zoom_${sala}`, "width=1200,height=800");
+    }
 
     return { success: true };
   } catch (error) {
     console.error("Error en joinZoomMeeting:", error);
+    if (meetingWindow && !meetingWindow.closed) {
+      meetingWindow.close();
+    }
     return {
       success: false,
       error: error.message || "Error al abrir la reunión",

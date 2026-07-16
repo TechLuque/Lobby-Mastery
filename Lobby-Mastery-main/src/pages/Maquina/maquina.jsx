@@ -48,7 +48,8 @@ const Maquina = () => {
 
   const handleJoinZoom = async () => {
     setJoiningZoom(true);
-    const result = await joinZoomMeeting('maquina', 'Máquina del Dinero');
+    const meetingWindow = window.open('', 'zoom_maquina', 'width=1200,height=800');
+    const result = await joinZoomMeeting('maquina', 'Máquina del Dinero', meetingWindow);
     setJoiningZoom(false);
     
     if (!result.success) {
