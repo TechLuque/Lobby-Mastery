@@ -38,8 +38,9 @@ export const getZoomMeetingLink = async (sala) => {
       try {
         const errorData = await response.json();
         errorMessage = errorData.error || errorMessage;
-      } catch {
-        // Response no es JSON
+      } catch (jsonError) {
+        const textData = await response.text();
+        errorMessage = textData || errorMessage;
       }
       return { success: false, error: errorMessage };
     }
