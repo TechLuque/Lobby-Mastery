@@ -48,7 +48,7 @@ const Maestria = () => {
 
   const handleJoinZoom = async () => {
     setJoiningZoom(true);
-    const meetingWindow = window.open('', 'zoom_maestria', 'width=1200,height=800');
+    const meetingWindow = window.open('about:blank', 'zoom_maestria', 'width=1200,height=800');
     const result = await joinZoomMeeting('maestria', 'Maestría', meetingWindow);
     setJoiningZoom(false);
     

@@ -48,7 +48,7 @@ const Codigo = () => {
 
   const handleJoinZoom = async () => {
     setJoiningZoom(true);
-    const meetingWindow = window.open('', 'zoom_codigo', 'width=1200,height=800');
+    const meetingWindow = window.open('about:blank', 'zoom_codigo', 'width=1200,height=800');
     const result = await joinZoomMeeting('codigo', 'Código del Dinero', meetingWindow);
     setJoiningZoom(false);
     
