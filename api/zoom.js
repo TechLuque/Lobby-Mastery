@@ -220,10 +220,10 @@ export default async function handler(req, res) {
 
   async function ensureRegistrantApprovedJoinUrl(registrantId) {
     await approveRegistrant(registrantId);
-    for (let attempt = 0; attempt < 4; attempt += 1) {
+    for (let attempt = 0; attempt < 10; attempt += 1) {
       const existing = await findExistingRegistrant();
       if (existing?.joinUrl) return existing;
-      await delay(300);
+      await delay(500);
     }
     return await findExistingRegistrant();
   }
@@ -258,27 +258,9 @@ export default async function handler(req, res) {
         await cacheJoinUrl(existing.joinUrl);
         return res.json({ joinUrl: existing.joinUrl });
       }
-
-      if (existing?.id) {
-        await approveRegistrant(existing.id);
-        const approved = await findExistingRegistrant();
-        if (approved?.joinUrl) {
-          await cacheJoinUrl(approved.joinUrl);
-          return res.json({ joinUrl: approved.joinUrl });
-        }
-      }
-
-      const meetRes = await fetch(
-        `https://api.zoom.us/v2/meetings/${meetingId}`,
-        { headers: { Authorization: `Bearer ${zoomToken}` } }
-      );
-      const meetData = await meetRes.json();
-      if (meetData.join_url) {
-        const displayName = `${userName} | ${userCurso.toUpperCase()}`;
-        const joinUrl = `${meetData.join_url}${meetData.join_url.includes('?') ? '&' : '?'}uname=${encodeURIComponent(displayName)}`;
-        await cacheJoinUrl(joinUrl);
-        return res.json({ joinUrl });
-      }
+      return res.status(500).json({
+        error: 'No se pudo obtener el join_url de Zoom tras aprobar el registro. Intenta nuevamente en unos segundos.',
+      });
     }
 
     if (
@@ -294,24 +276,20 @@ export default async function handler(req, res) {
       const existing = await findExistingRegistrant();
       if (existing) {
         if (existing.status === 'pending') {
-          await approveRegistrant(existing.id);
+          const approved = await ensureRegistrantApprovedJoinUrl(existing.id);
+          if (approved?.joinUrl) {
+            await cacheJoinUrl(approved.joinUrl);
+            return res.json({ joinUrl: approved.joinUrl });
+          }
         }
-        await cacheJoinUrl(existing.joinUrl);
-        return res.json({ joinUrl: existing.joinUrl });
+        if (existing.joinUrl) {
+          await cacheJoinUrl(existing.joinUrl);
+          return res.json({ joinUrl: existing.joinUrl });
+        }
       }
-
-      const meetRes = await fetch(
-        `https://api.zoom.us/v2/meetings/${meetingId}`,
-        { headers: { Authorization: `Bearer ${zoomToken}` } }
-      );
-      const meetData = await meetRes.json();
-      if (!meetData.join_url) {
-        return res.status(500).json({ error: 'No se pudo obtener la reunion. Verifica el Meeting ID.' });
-      }
-      const displayName = `${userName} | ${userCurso.toUpperCase()}`;
-      const joinUrl = `${meetData.join_url}${meetData.join_url.includes('?') ? '&' : '?'}uname=${encodeURIComponent(displayName)}`;
-      await cacheJoinUrl(joinUrl);
-      return res.json({ joinUrl });
+      return res.status(500).json({
+        error: 'No se encontró el join_url de Zoom para este usuario. Intenta de nuevo o contacta soporte.',
+      });
     }
 
     return res.status(500).json({
