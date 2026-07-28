@@ -261,8 +261,9 @@ export default async function handler(req, res) {
       return res.json({ joinUrl });
     }
 
+    console.error('Zoom registrant error (sin manejar):', JSON.stringify(regData));
     return res.status(500).json({
-      error: `Error de Zoom: ${regData.message || 'Error al registrar en la reunion'}`,
+      error: `Error de Zoom (code ${regData.code ?? 's/n'}): ${regData.message || 'Error al registrar en la reunion'}`,
     });
   } catch (err) {
     return res.status(500).json({ error: 'Error al conectar con Zoom: ' + err.message });
