@@ -228,6 +228,18 @@ export default async function handler(req, res) {
       return res.json({ joinUrl: regData.join_url });
     }
 
+    if (regData.registrant_id) {
+      // Zoom returned un registrant creado correctamente, pero pending
+      // porque la reunión requiere aprobación manual. Aprueba y busca
+      // el join_url aprobado.
+      await approveRegistrant(regData.registrant_id);
+      const existing = await findExistingRegistrant();
+      if (existing) {
+        await cacheJoinUrl(existing.joinUrl);
+        return res.json({ joinUrl: existing.joinUrl });
+      }
+    }
+
     if (
       regData.code === 3000 ||
       regData.code === 300 ||

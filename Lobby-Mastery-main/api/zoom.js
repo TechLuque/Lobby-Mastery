@@ -192,6 +192,16 @@ export default async function handler(req, res) {
       return res.json({ joinUrl: regData.join_url });
     }
 
+    if (regData.registrant_id) {
+      // Zoom retornó un registrant creado correctamente, pero pendiente
+      // porque la reunión requiere aprobación manual.
+      await approveRegistrant(regData.registrant_id);
+      const existing = await findExistingRegistrant();
+      if (existing) {
+        return res.json({ joinUrl: existing.joinUrl });
+      }
+    }
+
     // El usuario ya está inscrito (o hubo rate limit): buscar su join_url
     // real de registrant en vez de caer al link genérico, que Zoom rechaza
     // pidiendo inscripción cuando la reunión la exige.
