@@ -146,7 +146,6 @@ export default async function handler(req, res) {
     );
     const d = await r.json();
     if (!d.access_token) {
-      console.error('Zoom token error:', JSON.stringify(d));
       return res.status(500).json({
         error: `Zoom: ${d.reason || d.message || JSON.stringify(d)}`,
       });
@@ -207,13 +206,10 @@ export default async function handler(req, res) {
         }
       );
       if (!approveRes.ok) {
-        const body = await approveRes.text();
-        console.error('Zoom approve registrant failed', approveRes.status, body);
         return false;
       }
       return true;
-    } catch (err) {
-      console.error('Zoom approve registrant error', err?.message || err);
+    } catch {
       return false;
     }
   }
@@ -318,7 +314,6 @@ export default async function handler(req, res) {
       return res.json({ joinUrl });
     }
 
-    console.error('Zoom registrant error (sin manejar):', JSON.stringify(regData));
     return res.status(500).json({
       error: `Error de Zoom (DEBUG): ${JSON.stringify(regData)}`,
     });
