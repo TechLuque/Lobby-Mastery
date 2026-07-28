@@ -163,6 +163,7 @@ export default async function handler(req, res) {
   const lastName = partes.length > 1 ? partes.slice(1).join(' ') : userCurso.toUpperCase();
 
   async function findExistingRegistrant() {
+    let firstMatch = null;
     for (const status of ['approved', 'pending']) {
       let nextPageToken = '';
       do {
@@ -175,11 +176,14 @@ export default async function handler(req, res) {
         const match = d.registrants?.find(
           (reg) => reg.email?.toLowerCase() === email.toLowerCase()
         );
-        if (match?.join_url) return { joinUrl: match.join_url, id: match.id, status };
+        if (match) {
+          if (match.join_url) return { joinUrl: match.join_url, id: match.id, status };
+          if (!firstMatch) firstMatch = { joinUrl: match.join_url, id: match.id, status };
+        }
         nextPageToken = d.next_page_token || '';
       } while (nextPageToken);
     }
-    return null;
+    return firstMatch;
   }
 
   // Aprueba automáticamente solo al registrant que nuestra propia app acaba
@@ -188,20 +192,44 @@ export default async function handler(req, res) {
   // quedando "pending" y requiere tu aprobación manual como host.
   async function approveRegistrant(registrantId) {
     try {
-      await fetch(`https://api.zoom.us/v2/meetings/${meetingId}/registrants/status`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${zoomToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'approve',
-          registrants: [{ id: registrantId, email }],
-        }),
-      });
-    } catch {
-      // No fatal: si falla, el host puede aprobar manualmente desde Zoom
+      const approveRes = await fetch(
+        `https://api.zoom.us/v2/meetings/${meetingId}/registrants/status`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${zoomToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'approve',
+            registrants: [{ id: registrantId, email }],
+          }),
+        }
+      );
+      if (!approveRes.ok) {
+        const body = await approveRes.text();
+        console.error('Zoom approve registrant failed', approveRes.status, body);
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.error('Zoom approve registrant error', err?.message || err);
+      return false;
     }
+  }
+
+  function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function ensureRegistrantApprovedJoinUrl(registrantId) {
+    await approveRegistrant(registrantId);
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      const existing = await findExistingRegistrant();
+      if (existing?.joinUrl) return existing;
+      await delay(300);
+    }
+    return await findExistingRegistrant();
   }
 
   try {
@@ -229,14 +257,31 @@ export default async function handler(req, res) {
     }
 
     if (regData.registrant_id) {
-      // Zoom returned un registrant creado correctamente, pero pending
-      // porque la reunión requiere aprobación manual. Aprueba y busca
-      // el join_url aprobado.
-      await approveRegistrant(regData.registrant_id);
-      const existing = await findExistingRegistrant();
-      if (existing) {
+      const existing = await ensureRegistrantApprovedJoinUrl(regData.registrant_id);
+      if (existing?.joinUrl) {
         await cacheJoinUrl(existing.joinUrl);
         return res.json({ joinUrl: existing.joinUrl });
+      }
+
+      if (existing?.id) {
+        await approveRegistrant(existing.id);
+        const approved = await findExistingRegistrant();
+        if (approved?.joinUrl) {
+          await cacheJoinUrl(approved.joinUrl);
+          return res.json({ joinUrl: approved.joinUrl });
+        }
+      }
+
+      const meetRes = await fetch(
+        `https://api.zoom.us/v2/meetings/${meetingId}`,
+        { headers: { Authorization: `Bearer ${zoomToken}` } }
+      );
+      const meetData = await meetRes.json();
+      if (meetData.join_url) {
+        const displayName = `${userName} | ${userCurso.toUpperCase()}`;
+        const joinUrl = `${meetData.join_url}${meetData.join_url.includes('?') ? '&' : '?'}uname=${encodeURIComponent(displayName)}`;
+        await cacheJoinUrl(joinUrl);
+        return res.json({ joinUrl });
       }
     }
 

@@ -128,6 +128,7 @@ export default async function handler(req, res) {
     partes.length > 1 ? partes.slice(1).join(' ') : userCurso.toUpperCase();
 
   async function findExistingRegistrant() {
+    let firstMatch = null;
     for (const status of ['approved', 'pending']) {
       let nextPageToken = '';
       do {
@@ -140,11 +141,14 @@ export default async function handler(req, res) {
         const match = d.registrants?.find(
           (reg) => reg.email?.toLowerCase() === email.toLowerCase()
         );
-        if (match?.join_url) return { joinUrl: match.join_url, id: match.id, status };
+        if (match) {
+          if (match.join_url) return { joinUrl: match.join_url, id: match.id, status };
+          if (!firstMatch) firstMatch = { joinUrl: match.join_url, id: match.id, status };
+        }
         nextPageToken = d.next_page_token || '';
       } while (nextPageToken);
     }
-    return null;
+    return firstMatch;
   }
 
   // Aprueba automáticamente solo al registrant que nuestra propia app acaba
@@ -167,6 +171,20 @@ export default async function handler(req, res) {
     } catch {
       // No fatal: si falla, el host puede aprobar manualmente desde Zoom
     }
+  }
+
+  function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function ensureRegistrantApprovedJoinUrl(registrantId) {
+    await approveRegistrant(registrantId);
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const existing = await findExistingRegistrant();
+      if (existing?.joinUrl) return existing;
+      await delay(300);
+    }
+    return await findExistingRegistrant();
   }
 
   try {
@@ -193,12 +211,27 @@ export default async function handler(req, res) {
     }
 
     if (regData.registrant_id) {
-      // Zoom retornó un registrant creado correctamente, pero pendiente
-      // porque la reunión requiere aprobación manual.
-      await approveRegistrant(regData.registrant_id);
-      const existing = await findExistingRegistrant();
-      if (existing) {
+      const existing = await ensureRegistrantApprovedJoinUrl(regData.registrant_id);
+      if (existing?.joinUrl) {
         return res.json({ joinUrl: existing.joinUrl });
+      }
+      if (existing?.id) {
+        await approveRegistrant(existing.id);
+        const approved = await findExistingRegistrant();
+        if (approved?.joinUrl) {
+          return res.json({ joinUrl: approved.joinUrl });
+        }
+      }
+
+      const meetRes = await fetch(
+        `https://api.zoom.us/v2/meetings/${meetingId}`,
+        { headers: { Authorization: `Bearer ${zoomToken}` } }
+      );
+      const meetData = await meetRes.json();
+      if (meetData.join_url) {
+        const displayName = `${userName} | ${userCurso.toUpperCase()}`;
+        const joinUrl = `${meetData.join_url}${meetData.join_url.includes('?') ? '&' : '?'}uname=${encodeURIComponent(displayName)}`;
+        return res.json({ joinUrl });
       }
     }
 
