@@ -63,6 +63,7 @@ export default async function handler(req, res) {
   // Obtener datos del usuario desde Firestore
   let userName = 'Usuario';
   let userCurso = meetingKey;
+  let hasAccess = false;
   try {
     const r = await fetch(`${FIRESTORE}:runQuery`, {
       method: 'POST',
@@ -83,11 +84,21 @@ export default async function handler(req, res) {
     });
     const d = await r.json();
     if (d[0]?.document?.fields) {
-      userName = d[0].document.fields.nombre?.stringValue || 'Usuario';
-      userCurso = d[0].document.fields.curso?.stringValue || meetingKey;
+      const fields = d[0].document.fields;
+      userName = fields.nombre?.stringValue || 'Usuario';
+      userCurso = fields.curso?.stringValue || meetingKey;
+      hasAccess = fields[`acceso_${meetingKey}`]?.booleanValue === true;
     }
   } catch {
-    // No fatal: se usan valores por defecto
+    // No fatal para nombre/curso, pero hasAccess queda en false (fail-closed)
+  }
+
+  // Filtro de seguridad: solo usuarios con acceso otorgado a esta sala
+  // pueden registrarse/entrar. Sin esto, cualquier usuario autenticado en la
+  // app (aunque no haya comprado esta sala) podría llegar a auto-aprobarse
+  // en la reunión, anulando el propósito de la aprobación manual en Zoom.
+  if (!hasAccess) {
+    return res.status(403).json({ error: 'No tienes acceso a esta sala.' });
   }
 
   // Obtener token de Zoom (Server-to-Server OAuth)
@@ -116,6 +127,48 @@ export default async function handler(req, res) {
   const lastName =
     partes.length > 1 ? partes.slice(1).join(' ') : userCurso.toUpperCase();
 
+  async function findExistingRegistrant() {
+    for (const status of ['approved', 'pending']) {
+      let nextPageToken = '';
+      do {
+        const url =
+          `https://api.zoom.us/v2/meetings/${meetingId}/registrants` +
+          `?status=${status}&page_size=300` +
+          (nextPageToken ? `&next_page_token=${nextPageToken}` : '');
+        const r = await fetch(url, { headers: { Authorization: `Bearer ${zoomToken}` } });
+        const d = await r.json();
+        const match = d.registrants?.find(
+          (reg) => reg.email?.toLowerCase() === email.toLowerCase()
+        );
+        if (match?.join_url) return { joinUrl: match.join_url, id: match.id, status };
+        nextPageToken = d.next_page_token || '';
+      } while (nextPageToken);
+    }
+    return null;
+  }
+
+  // Aprueba automáticamente solo al registrant que nuestra propia app acaba
+  // de crear/encontrar para un usuario YA validado (hasAccess === true).
+  // Quien se autoregistre directamente en el link público de Zoom sigue
+  // quedando "pending" y requiere tu aprobación manual como host.
+  async function approveRegistrant(registrantId) {
+    try {
+      await fetch(`https://api.zoom.us/v2/meetings/${meetingId}/registrants/status`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${zoomToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'approve',
+          registrants: [{ id: registrantId, email }],
+        }),
+      });
+    } catch {
+      // No fatal: si falla, el host puede aprobar manualmente desde Zoom
+    }
+  }
+
   try {
     const regRes = await fetch(
       `https://api.zoom.us/v2/meetings/${meetingId}/registrants`,
@@ -135,15 +188,26 @@ export default async function handler(req, res) {
     const regData = await regRes.json();
 
     if (regData.join_url) {
+      await approveRegistrant(regData.registrant_id);
       return res.json({ joinUrl: regData.join_url });
     }
 
-    // Fallback: reunión sin registro habilitado → usar join_url + uname
+    // El usuario ya está inscrito (o hubo rate limit): buscar su join_url
+    // real de registrant en vez de caer al link genérico, que Zoom rechaza
+    // pidiendo inscripción cuando la reunión la exige.
     if (
       regData.code === 3000 ||
       regData.code === 300 ||
       regData.message?.toLowerCase().includes('registration')
     ) {
+      const existing = await findExistingRegistrant();
+      if (existing) {
+        if (existing.status === 'pending') {
+          await approveRegistrant(existing.id);
+        }
+        return res.json({ joinUrl: existing.joinUrl });
+      }
+
       const meetRes = await fetch(
         `https://api.zoom.us/v2/meetings/${meetingId}`,
         { headers: { Authorization: `Bearer ${zoomToken}` } }
