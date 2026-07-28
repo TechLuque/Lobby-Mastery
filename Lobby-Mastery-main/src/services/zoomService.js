@@ -51,11 +51,12 @@ export const getZoomMeetingLink = async (sala) => {
 
     if (!response.ok) {
       let errorMessage = `Error HTTP ${response.status}`;
+      const responseText = await response.text();
       try {
-        const errorData = await response.json();
+        const errorData = JSON.parse(responseText);
         errorMessage = errorData.error || errorMessage;
       } catch {
-        // Response no es JSON
+        errorMessage = responseText || errorMessage;
       }
       console.error("Error en Cloud Function:", errorMessage);
       return { success: false, error: errorMessage };
