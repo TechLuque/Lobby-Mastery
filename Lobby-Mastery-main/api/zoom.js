@@ -179,10 +179,10 @@ export default async function handler(req, res) {
 
   async function ensureRegistrantApprovedJoinUrl(registrantId) {
     await approveRegistrant(registrantId);
-    for (let attempt = 0; attempt < 3; attempt += 1) {
+    for (let attempt = 0; attempt < 10; attempt += 1) {
       const existing = await findExistingRegistrant();
       if (existing?.joinUrl) return existing;
-      await delay(300);
+      await delay(500);
     }
     return await findExistingRegistrant();
   }
@@ -205,25 +205,14 @@ export default async function handler(req, res) {
     );
     const regData = await regRes.json();
 
-    if (regData.join_url) {
-      await approveRegistrant(regData.registrant_id);
-      return res.json({ joinUrl: regData.join_url });
-    }
-
     if (regData.registrant_id) {
       const existing = await ensureRegistrantApprovedJoinUrl(regData.registrant_id);
       if (existing?.joinUrl) {
         return res.json({ joinUrl: existing.joinUrl });
       }
-      if (existing?.id) {
-        await approveRegistrant(existing.id);
-        const approved = await findExistingRegistrant();
-        if (approved?.joinUrl) {
-          return res.json({ joinUrl: approved.joinUrl });
-        }
-      }
       return res.status(500).json({
         error: 'No se pudo obtener el join_url de Zoom tras aprobar el registrante. Intenta nuevamente en unos segundos.',
+        debug: { regData, existing },
       });
     }
 
@@ -236,19 +225,18 @@ export default async function handler(req, res) {
       regData.message?.toLowerCase().includes('registration')
     ) {
       const existing = await findExistingRegistrant();
-      if (existing) {
-        if (existing.status === 'pending') {
-          await approveRegistrant(existing.id);
+      if (existing?.status === 'pending') {
+        const approved = await ensureRegistrantApprovedJoinUrl(existing.id);
+        if (approved?.joinUrl) {
+          return res.json({ joinUrl: approved.joinUrl });
         }
-        return res.json({ joinUrl: existing.joinUrl });
       }
-
-      const existing = await findExistingRegistrant();
       if (existing?.joinUrl) {
         return res.json({ joinUrl: existing.joinUrl });
       }
       return res.status(500).json({
         error: 'No se pudo obtener el join_url de registrant desde Zoom. Intenta nuevamente o contacta soporte.',
+        debug: { regData, existing },
       });
     }
 
