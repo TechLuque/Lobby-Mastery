@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer';
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -7,8 +8,22 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Metodo no permitido' });
 
+  // Red de seguridad: cualquier excepción no prevista dentro de zoomHandler
+  // se convierte en una respuesta JSON 500 en vez de tumbar la función
+  // serverless entera (lo que Vercel reporta como FUNCTION_INVOCATION_FAILED,
+  // un texto plano que el frontend no puede parsear como error legible).
+  try {
+    return await zoomHandler(req, res);
+  } catch (err) {
+    return res.status(500).json({
+      error: 'Error inesperado del servidor: ' + (err?.message || String(err)),
+    });
+  }
+}
+
+async function zoomHandler(req, res) {
   const VALID_SALAS = ['codigo', 'maquina', 'maestria'];
-  const { meetingKey } = req.body;
+  const { meetingKey } = req.body || {};
 
   if (!meetingKey || !VALID_SALAS.includes(meetingKey)) {
     return res.status(400).json({ error: 'meetingKey invalido' });
@@ -106,18 +121,6 @@ export default async function handler(req, res) {
     return res.status(403).json({ error: 'No tienes acceso a esta sala.' });
   }
 
-  if (cachedJoinUrl) {
-    const existing = await findExistingRegistrant();
-    if (existing?.joinUrl) {
-      if (existing.joinUrl !== cachedJoinUrl) {
-        await cacheJoinUrl(existing.joinUrl);
-      }
-      return res.json({ joinUrl: existing.joinUrl });
-    }
-    // Si la URL cacheada no coincide con el registrant actual, ignorarla
-    // y continuar para obtener la URL correcta de Zoom.
-  }
-
   async function cacheJoinUrl(joinUrl) {
     if (!userDocName) return;
     try {
@@ -143,6 +146,13 @@ export default async function handler(req, res) {
     }
   }
 
+  // El token de Zoom debe obtenerse ANTES de usar findExistingRegistrant()
+  // (incluido el chequeo de cachedJoinUrl más abajo, que depende de él).
+  // findExistingRegistrant() lee `zoomToken` de este closure; si se llamara
+  // antes de que esta asignación se ejecutara, `zoomToken` seguiría en la
+  // zona muerta temporal de `let` y lanzaría un ReferenceError no controlado,
+  // tumbando toda la función serverless (FUNCTION_INVOCATION_FAILED) — esto
+  // pasaba justo para usuarios ya registrados con un joinUrl cacheado.
   const zoomAuth = Buffer.from(
     `${process.env.ZOOM_CLIENT_ID}:${process.env.ZOOM_CLIENT_SECRET}`
   ).toString('base64');
@@ -164,6 +174,18 @@ export default async function handler(req, res) {
     return res.status(500).json({
       error: 'No se pudo conectar con Zoom: ' + e.message,
     });
+  }
+
+  if (cachedJoinUrl) {
+    const existing = await findExistingRegistrant();
+    if (existing?.joinUrl) {
+      if (existing.joinUrl !== cachedJoinUrl) {
+        await cacheJoinUrl(existing.joinUrl);
+      }
+      return res.json({ joinUrl: existing.joinUrl });
+    }
+    // Si la URL cacheada no coincide con el registrant actual, ignorarla
+    // y continuar para obtener la URL correcta de Zoom.
   }
 
   const partes = userName.trim().split(/\s+/);
