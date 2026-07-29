@@ -277,6 +277,16 @@ async function zoomHandler(req, res) {
     );
     const regData = await regRes.json();
 
+    // Si la reunión no exige aprobación manual, Zoom ya devuelve el
+    // join_url en la propia respuesta de registro. Usarlo de inmediato
+    // evita depender del sondeo de la lista de registrantes, que puede
+    // tardar en reflejar un registro recién creado y provocar el error
+    // "No se pudo obtener el join_url... tras aprobar el registrante".
+    if (regData.join_url) {
+      await cacheJoinUrl(regData.join_url);
+      return res.json({ joinUrl: regData.join_url });
+    }
+
     if (regData.registrant_id) {
       const existing = await ensureRegistrantApprovedJoinUrl(regData.registrant_id);
       if (existing?.joinUrl) {
