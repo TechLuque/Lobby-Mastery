@@ -203,6 +203,15 @@ async function zoomHandler(req, res) {
           (nextPageToken ? `&next_page_token=${nextPageToken}` : '');
         const r = await fetch(url, { headers: { Authorization: `Bearer ${zoomToken}` } });
         const d = await r.json();
+        if (!r.ok) {
+          console.error('[zoom] listado de registrantes fallo', {
+            status: r.status,
+            body: d,
+            meetingId,
+            statusFiltro: status,
+          });
+          break;
+        }
         const match = d.registrants?.find(
           (reg) => reg.email?.toLowerCase() === email.toLowerCase()
         );
