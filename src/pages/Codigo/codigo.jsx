@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCurrentUser, logoutUser } from '../../services/authService';
-import { getUserByEmail } from '../../services/userService';
+import { logoutUser } from '../../services/authService';
+import { useUserData } from '../../context/UserContext';
 import { joinZoomMeeting } from '../../services/zoomService';
 import '../buttons.css';
 import '../navbar.css';
@@ -11,31 +11,9 @@ import './codigo.css';
 
 const Codigo = () => {
   const navigate = useNavigate();
-  const [hasAccess, setHasAccess] = useState(null);
-  const [, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { userData, userLoading: loading } = useUserData();
+  const hasAccess = userData?.acceso_codigo === true;
   const [joiningZoom, setJoiningZoom] = useState(false);
-
-  useEffect(() => {
-    const checkAccess = async () => {
-      try {
-        const authUser = await getCurrentUser();
-        if (!authUser?.email) {
-          navigate('/login');
-          return;
-        }
-        const data = await getUserByEmail(authUser.email);
-        setUserData(data);
-        setHasAccess(data?.acceso_codigo === true);
-      } catch (err) {
-        console.error('Error verificando acceso:', err);
-        setHasAccess(false);
-      } finally {
-        setLoading(false);
-      }
-    };
-    checkAccess();
-  }, [navigate]);
 
   const handleBackToLobby = () => {
     navigate('/lobby');
@@ -131,7 +109,7 @@ const Codigo = () => {
       </nav>
 
       {/* VIDEO DE FONDO */}
-      <video className="video-background" autoPlay muted loop playsInline preload="auto">
+      <video className="video-background" autoPlay muted loop playsInline preload="metadata">
         <source src="/videos/LOGO_CDD_AZUL.mp4" type="video/mp4" />
       </video>
 

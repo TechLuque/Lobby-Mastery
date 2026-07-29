@@ -1,7 +1,7 @@
-﻿import { useState, useEffect } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { logoutUser, getCurrentUser } from '../../services/authService';
-import { getUserByEmail } from '../../services/userService';
+import { logoutUser } from '../../services/authService';
+import { useUserData } from '../../context/UserContext';
 import logoCDD from '../../assets/images/LOGO CDD C.svg';
 import logoMDD from '../../assets/images/LOGO MDD A.svg';
 import logoMST from '../../assets/images/LOGO_MST GRIS.svg';
@@ -11,26 +11,8 @@ import './lobby.css';
 
 const Lobby = () => {
   const navigate = useNavigate();
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { userData, userLoading: loading } = useUserData();
   const [accessDeniedMsg, setAccessDeniedMsg] = useState('');
-
-  useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        const authUser = await getCurrentUser();
-        if (authUser?.email) {
-          const data = await getUserByEmail(authUser.email);
-          setUserData(data);
-        }
-      } catch (err) {
-        console.error('Error al cargar datos del usuario:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadUserData();
-  }, []);
 
   const handleLogout = async () => {
     await logoutUser();
