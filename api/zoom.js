@@ -237,10 +237,18 @@ async function zoomHandler(req, res) {
         }
       );
       if (!approveRes.ok) {
+        const body = await approveRes.text().catch(() => '');
+        console.error('[zoom] approveRegistrant fallo', {
+          status: approveRes.status,
+          body,
+          meetingId,
+          registrantId,
+        });
         return false;
       }
       return true;
-    } catch {
+    } catch (e) {
+      console.error('[zoom] approveRegistrant excepcion', e?.message);
       return false;
     }
   }
@@ -293,6 +301,13 @@ async function zoomHandler(req, res) {
         await cacheJoinUrl(existing.joinUrl);
         return res.json({ joinUrl: existing.joinUrl });
       }
+      console.error('[zoom] no se obtuvo joinUrl tras aprobar', {
+        meetingId,
+        meetingKey,
+        email,
+        regData,
+        existing,
+      });
       return res.status(500).json({
         error: 'No se pudo obtener el join_url de Zoom tras aprobar el registrante. Intenta nuevamente en unos segundos.',
         debug: { regData, existing },
