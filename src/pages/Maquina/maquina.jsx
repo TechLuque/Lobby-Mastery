@@ -1,8 +1,7 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logoutUser } from '../../services/authService';
 import { useUserData } from '../../context/UserContext';
-import { joinZoomMeeting } from '../../services/zoomService';
+import { useZoomJoin } from '../../hooks/useZoomJoin';
 import '../buttons.css';
 import '../navbar.css';
 import '../whatsapp.css';
@@ -13,7 +12,7 @@ const Maquina = () => {
   const navigate = useNavigate();
   const { userData, userLoading: loading } = useUserData();
   const hasAccess = userData?.acceso_maquina === true;
-  const [joiningZoom, setJoiningZoom] = useState(false);
+  const { joining: joiningZoom, openMeeting } = useZoomJoin('maquina', 'Máquina del Dinero', hasAccess);
 
   const handleBackToLobby = () => {
     navigate('/lobby');
@@ -25,11 +24,7 @@ const Maquina = () => {
   };
 
   const handleJoinZoom = async () => {
-    setJoiningZoom(true);
-    const meetingWindow = window.open('about:blank', 'zoom_maquina', 'width=1200,height=800');
-    const result = await joinZoomMeeting('maquina', 'Máquina del Dinero', meetingWindow);
-    setJoiningZoom(false);
-    
+    const result = await openMeeting();
     if (!result.success) {
       alert('Error: ' + result.error);
     }
